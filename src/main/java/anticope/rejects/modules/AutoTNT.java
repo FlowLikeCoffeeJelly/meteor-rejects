@@ -13,8 +13,9 @@ import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.world.BlockIterator;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.TntBlock;
+import net.minecraft.block.BeehiveBlock;
 import net.minecraft.item.FireChargeItem;
+import net.minecraft.item.ItemShears;
 import net.minecraft.item.FlintAndSteelItem;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -33,7 +34,7 @@ public class AutoTNT extends Module {
 
     private final Setting<Boolean> ignite = sgGeneral.add(new BoolSetting.Builder()
             .name("ignite")
-            .description("Whether to ignite tnt.")
+            .description("Whether to ignite beehives.")
             .defaultValue(true)
             .build()
     );
@@ -62,8 +63,8 @@ public class AutoTNT extends Module {
 
     private final Setting<Boolean> antiBreak = sgGeneral.add(new BoolSetting.Builder()
             .name("anti-break")
-            .description("Whether to save flint and steel from breaking.")
-            .defaultValue(true)
+            .description("Whether to save sheears from breaking.")
+            .defaultValue(false)
             .visible(ignite::get)
             .build()
     );
@@ -71,7 +72,7 @@ public class AutoTNT extends Module {
     private final Setting<Boolean> fireCharge = sgGeneral.add(new BoolSetting.Builder()
             .name("fire-charge")
             .description("Whether to also use fire charges.")
-            .defaultValue(true)
+            .defaultValue(false)
             .visible(ignite::get)
             .build()
     );
@@ -88,7 +89,7 @@ public class AutoTNT extends Module {
     private int igniteTick = 0;
 
     public AutoTNT() {
-        super(MeteorRejectsAddon.CATEGORY, "auto-tnt", "Ignites tnt automatically. Good for griefing.");
+        super(MeteorRejectsAddon.CATEGORY, "auto-tnt", "Ignites beehives automatically. Good for griefing.");
     }
 
     @Override
@@ -105,7 +106,7 @@ public class AutoTNT extends Module {
 
             // Register
             BlockIterator.register(horizontalRange.get(), verticalRange.get(), (blockPos, blockState) -> {
-                if (blockState.getBlock() instanceof TntBlock) blocksToIgnite.add(ignitePool.get().set(blockPos));
+                if (blockState.getBlock() instanceof BeehiveBlock) blocksToIgnite.add(ignitePool.get().set(blockPos));
             });
         }
     }
@@ -120,7 +121,7 @@ public class AutoTNT extends Module {
 
                 // Ignition
                 FindItemResult itemResult = InvUtils.findInHotbar(item -> {
-                    if (item.getItem() instanceof FlintAndSteelItem) {
+                    if (item.getItem() instanceof ItemShears) {
                         return (antiBreak.get() && (item.getMaxDamage() - item.getDamage()) > 10);
                     }
                     else if (item.getItem() instanceof FireChargeItem) {
